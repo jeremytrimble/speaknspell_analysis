@@ -1,0 +1,32 @@
+
+[build-system]
+requires = ["setuptools"]  # REQUIRED if [build-system] table is used
+build-backend = "setuptools.build_meta"  # If not defined, then legacy behavior can happen.
+
+[project]
+name = "spana"  # REQUIRED, is the only field that cannot be marked as dynamic.
+version = "0.1.0"  # REQUIRED, although can be dynamic
+description = "Speak-n-Spell Analysis"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE.txt"}
+keywords = ["spana", "setuptools", "development"]
+
+authors = [
+  {name = "Jeremy Trimble"}
+]
+
+
+dependencies = [
+"numpy", "scipy", "pandas", "pydub"
+]
+
+[project.optional-dependencies]
+dev = ["check-manifest"]
+test = ["pytest"]
+
+
+#[tool.setuptools.packages.find]
+#where = ["src"]
+#include = ["spana*/**"]
+
