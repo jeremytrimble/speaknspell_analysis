@@ -88,7 +88,8 @@ class OffsetTableDb:
     def generate_bytes_for_image(self, entry_prefix_bytes=None) -> bytes:
 
         ba = bytearray(
-            bytes.fromhex("00e0")+
+            #bytes.fromhex("00e0")+
+            len(self._offset_table_entries).to_bytes(length=2, byteorder='big') +
             PRESUMED_OFFSET_TABLE_BASE_ADDRESS.to_bytes(length=3, byteorder="big") +    # OFFSET_TABLE_BASE
             (0x0b + 5*(PRESUMED_OFFSET_TABLE_LENGTH+1)).to_bytes(length=3, byteorder="big") + # OFFSET_TABLE_END
             (0x0b + 5*(PRESUMED_OFFSET_TABLE_LENGTH+1)).to_bytes(length=3, byteorder="big")   # SOMETHING_ELSE_PTR
@@ -111,6 +112,28 @@ class OffsetTableDb:
     def get_default(cls):
         FDATA = get_default_image_bytes()
         return cls.from_flash_image(FDATA)
+
+    @classmethod
+    def get_blank(cls, num_offset_table_entries, rate_divider:int=0xcd):
+
+        offset_table_idx_to_speech = {}
+        if 1:
+            df = pd.read_csv(KNOWN_PHRASES_CSV)
+            offset_table_idx_to_speech = dict([ (row['offset_table_idx'], nan_to_none(row['speech'])) for idx,row in df.iterrows()])
+
+        entries = [
+            OffsetTableEntry(
+                idx=idx,
+                rate_divider=rate_divider,
+                sound_data_start_addr=0,
+                sound_data_end_addr=0,
+                speech=offset_table_idx_to_speech[idx],
+            )
+            for idx in range(num_offset_table_entries)
+        ]
+
+        return cls(entries=entries)
+
 
     @classmethod
     def from_flash_image(cls, FDATA: bytes, offset_table_length:int=PRESUMED_OFFSET_TABLE_LENGTH):

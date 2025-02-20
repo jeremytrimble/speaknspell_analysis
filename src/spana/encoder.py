@@ -82,7 +82,10 @@ class Encoder:
 
         hb = header_bits(g=g, keep_going=True)
 
-        encoded_bytes = bytes(list(encode_samples(steps, hb)))
+        sample_list = list(int(x) for x in encode_samples(steps, hb))
+        sample_list = [ (x if x >=0 else x%256) for x in sample_list ]
+        #print(f"{sample_list=}")
+        encoded_bytes = bytes(sample_list)
         score = np.sum(error**2)
         last_sample = cur
 

@@ -1,7 +1,7 @@
 from spana.util import TempFileMgr
 from spana.parse_trace import parse_read_operations
 from spana.offset_table import OffsetTableDb, OffsetTableEntry
-from spana.encoder import encoder_main, Encoder, Decoder, encode_samples, header_bits
+from spana.encoder import Encoder, encode_samples, header_bits
 import typing
 import random
 
@@ -405,26 +405,26 @@ def speech_bytes_to_frames(byts:bytes, frame_size_bytes:int=12, dtype=float):
 def nibble_swap(a):
     return ((a&0b1111_0000)>>4) | ((a&0b0000_1111)<<4)
 
-def add_encoded_data(FMOD:bytearray, oft:OffsetTableDb):
-
-    speech_lkup = "Beep 217"
-    entry = oft.lookup_by_speech(speech_lkup)[0]
-    byts = FMOD[entry.sound_data_start_addr:entry.sound_data_end_addr]
-    frames = speech_bytes_to_frames(byts)
-
-    new_data = encoder_main()
-    print(f"{len(new_data)=}")
-
-    # place "frames" into first beep's speech area (then later we make all beeps point to that slot)
-    beep_entries :typing.List[OffsetTableEntry]= oft.lookup_by_speech("*Beep*")
-    first_beep_entry = beep_entries[0]
-    graft_start = first_beep_entry.sound_data_start_addr
-    graft_end = graft_start + len(new_data)
-    FMOD[graft_start:graft_end] = new_data
-
-    save_latest_first_beep_data(new_data)
-
-    return FMOD
+#def add_encoded_data(FMOD:bytearray, oft:OffsetTableDb):
+#
+#    speech_lkup = "Beep 217"
+#    entry = oft.lookup_by_speech(speech_lkup)[0]
+#    byts = FMOD[entry.sound_data_start_addr:entry.sound_data_end_addr]
+#    frames = speech_bytes_to_frames(byts)
+#
+#    new_data = encoder_main()
+#    print(f"{len(new_data)=}")
+#
+#    # place "frames" into first beep's speech area (then later we make all beeps point to that slot)
+#    beep_entries :typing.List[OffsetTableEntry]= oft.lookup_by_speech("*Beep*")
+#    first_beep_entry = beep_entries[0]
+#    graft_start = first_beep_entry.sound_data_start_addr
+#    graft_end = graft_start + len(new_data)
+#    FMOD[graft_start:graft_end] = new_data
+#
+#    save_latest_first_beep_data(new_data)
+#
+#    return FMOD
 
 def encoded_synth(FMOD:bytearray, oft:OffsetTableDb):
 
@@ -938,7 +938,7 @@ def parse_args():
             "repeated_periodic_sound",
             "encoded_synth",
             "say_twosix_eesg",
-            "add_encoded_data",
+            #"add_encoded_data",
             "chipmunk_mode",
             "antichipmunk_mode",
             "synthesizer", 
@@ -981,9 +981,9 @@ def main():
     elif args.mod == "say_twosix_eesg":
         FMOD = say_twosix_eesg(FMOD, oft)
         FMOD = make_all_beeps_point_to_first_beep(FMOD, oft)
-    elif args.mod == "add_encoded_data":
-        FMOD = add_encoded_data(FMOD, oft)
-        FMOD = make_all_beeps_point_to_first_beep(FMOD, oft)
+    #elif args.mod == "add_encoded_data":
+    #    FMOD = add_encoded_data(FMOD, oft)
+    #    FMOD = make_all_beeps_point_to_first_beep(FMOD, oft)
     elif args.mod == "access_mystery_data":
         FMOD = access_mystery_data(FMOD, oft)
         #FMOD = make_all_beeps_point_to_first_beep(FMOD, oft)
@@ -1013,7 +1013,7 @@ def main():
         #FMOD = chipmunk_mode(FMOD, oft)
         #FMOD = synthesizer2(FMOD, oft)
 
-        FMOD = add_encoded_data(FMOD, oft)
+        #FMOD = add_encoded_data(FMOD, oft)
 
         #FMOD = encoded_synth(FMOD, oft)
         #FMOD = encoded_synth_raw(FMOD, oft)

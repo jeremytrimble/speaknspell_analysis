@@ -84,8 +84,9 @@ def main():
     #print(f"{len(idx_to_matching_filename)=}")
     #print(f"{len(unique_filenames)=}")
 
-    print(f"Encoding...")
-    with multiprocessing.Pool(processes=6) as pool:
+    NUM_PROCESSES = multiprocessing.cpu_count() - 2
+    print(f"Encoding {len(idx_to_matching_filename)} files in {NUM_PROCESSES} parallel processes...")
+    with multiprocessing.Pool(processes=NUM_PROCESSES) as pool:
         encoded_bytes = pool.map(encode_single_file, unique_filenames)
         filename_to_encoded_bytes = dict(zip(unique_filenames, encoded_bytes))
     del encoded_bytes
@@ -96,7 +97,7 @@ def main():
     filename_to_encoded_bytes_offset = {}
 
     prefix    = bytes.fromhex("008800 008800 008800 008800")
-    separator = bytes.fromhex('008800 008800 008800 0088000 088010 00000')
+    separator = bytes.fromhex('008800 008800 008800 008800 008801 000000')
 
     print(f"Allocating...")
     # associate offset table entry to a sound
@@ -109,7 +110,7 @@ def main():
     SOUND_SECTION_START_OFFSET = 0x470
 
     print(f"Relocating...")
-    otd = OffsetTableDb.get_default()
+    otd = OffsetTableDb.get_blank( num_offset_table_entries=len(idx_to_matching_filename) )
     for otd_idx in range(len(otd)):
         ote = otd.get_by_idx(otd_idx)
         ote.sample_rate_Hz = 10000
