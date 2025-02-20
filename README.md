@@ -33,12 +33,29 @@ pip install -e .
 
 ## Usage
 
-There are 3 main capabilities provided in this repository: `live_trace`, `decoder` and `encoder`
+There are 3 main capabilities provided in this repository: 
 
+1. Compiling a new Speak&Spell 2019-compatible "voice pack."
+2. Decoding a SPI Flash Image
+3. "Live Tracing" of SPI Flash data access with `python -m spana.live_trace`
 
+Note: 2 and 3 require that you have an extracted Speak&Spell 2019 Flash Image (see below for how to do this with a SPI Flash reader).
 
-### `encoder`
-Compiles a new 2019 Speak&Spell-compatible voice pack for programming onto your own Speak&Spell SPI Flash IC.
+### Compiling a new voice pack.
+
+You will need 223 or so numerically-named WAV files (at 10kHz sample rate, currently the code does not do resampling).
+You can generate these yourself (by recording yourself saying the words and phrases in `known_phrases.csv`) or use the existing ones in the `voice_packs/snoop_dogg` directory.
+
+To compile:
+```shell
+$ python -m spana.compile_voice_pack --wav-dir voice_packs/snoop_dogg/
+Encoding 224 files in 14 parallel processes...
+Allocating...
+Relocating...
+Saving to compiled_voice_pack.bin
+```
+
+Note: The script looks for a 3-digit number (with leading zeros) in the wav filename to map the file to a particular offset table index.  The 3-digit number just has to be somewhere in the filename, before the `.wav` suffix (e.g. `angel_042.wav`, `042_angel.wav`, and `ANG042EL.wav` are all acceptable).
 
 Usage:
 ```
@@ -64,8 +81,8 @@ Decodes all of the sound blobs from a 2019 Speak&Spell SPI Flash image into wav 
 Operates on the ORIGINAL_FLASH_IMAGE file by default, or can be specified on command line (run with `--help` for options)
 
 Example:
-```
-python -m spana.decode_sounds_to_wav
+```shell
+$ python -m spana.decode_sounds_to_wav
   wrote decoded_sounds/ss_000_A.wav, enc size:  2944, pcm size: 11178, CR: 3.80
   wrote decoded_sounds/ss_001_B.wav, enc size:  2448, pcm size: 9292, CR: 3.80
   wrote decoded_sounds/ss_002_C.wav, enc size:  2784, pcm size: 10580, CR: 3.80
@@ -80,8 +97,8 @@ python -m spana.decode_sounds_to_wav
 Loads an (optionally modified) SPI flash image onto the EM-100 SPI Flash Emulator 
 
 Example:
-```
-python -m spana.live_trace -M chipmunk_mode
+```shell
+$ python -m spana.live_trace -M chipmunk_mode
 ```
 
 

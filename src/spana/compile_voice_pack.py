@@ -31,6 +31,7 @@ table it will be encoded into.
 See known_phrases.csv for a list of all known Speak&Spell words."""
     )
     parser.add_argument("-d", "--wav-dir", required=1, type=str, help="Input search dir for wav files")
+    parser.add_argument("-o", "--output-filename", type=str, help="Output filename (default: compilied_voice_pack.bin)", default="compiled_voice_pack.bin")
 
     return parser.parse_args()
 
@@ -135,8 +136,9 @@ def main():
     if len(image) < 2**20:
         image += bytes([0] * (2**20-len(image)))
 
-    print(f"Saving file...")
-    with open("custom_voice_pack.bin", "wb") as out_fo:
+    
+    print(f"Saving to {args.output_filename}")
+    with open(args.output_filename, "wb") as out_fo:
         out_fo.write(image)
     print(f"done")
 
