@@ -21,14 +21,18 @@ def get_single_match(pattern, dir_to_search):
 def parse_args():
     import argparse
 
-    parser = argparse.ArgumentParser("constructor", "Build a Speak & Spell flash image from wav files")
+    parser = argparse.ArgumentParser("compile_voice_pack", 
+        description="Build a Speak & Spell flash image from wav files",
+        epilog="""The directory specified with -d/--wav-dir should contain 223 WAV files (at 10kHz
+sample rate).  Each wav file should have a 3-digit (with leading zeros) number
+in the filename (e.g. 042_angel.wav) which indicates which record in the offset
+table it will be encoded into.
+
+See known_phrases.csv for a list of all known Speak&Spell words."""
+    )
     parser.add_argument("-d", "--wav-dir", required=1, type=str, help="Input search dir for wav files")
 
     return parser.parse_args()
-
-def get_wav_file_dir():
-    return os.path.join(this_file_dir, "../../sounds_to_encode")
-
 
 def normalize_signal(s):
     s = np.hstack([ [0], s ])
@@ -131,7 +135,7 @@ def main():
         image += bytes([0] * (2**20-len(image)))
 
     print(f"Saving file...")
-    with open("constructed_image.bin", "wb") as out_fo:
+    with open("custom_voice_pack.bin", "wb") as out_fo:
         out_fo.write(image)
     print(f"done")
 

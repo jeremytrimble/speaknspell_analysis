@@ -1,6 +1,5 @@
 import typing
 import numpy as np
-from scipy.io.wavfile import read as wav_read, write as wav_write
 import os, sys
 import dataclasses
 import io
@@ -231,74 +230,4 @@ class Decoder:
         for vals in self.decode(in_fo):
             L.extend(vals)
         return L
-
-
-def encoder_main():
-    this_file_dir = os.path.dirname(os.path.normpath(__file__))
-    #HELLO_WAV = os.path.join(this_file_dir, "../../../sounds/wav/hello_10k.wav")
-    #HELLO_WAV = os.path.join(this_file_dir, "../../../sounds/song_test/song_test.wav")
-    HELLO_WAV = os.path.join(this_file_dir, "../../../sounds/snoop_test/snoop_test2.wav")
-
-    sample_rate, s = wav_read(HELLO_WAV)
-    print(f"{sample_rate=} {s=}")
-
-    s = np.hstack([ [0], s ])
-
-    s_max = np.abs(s).max()
-    s = (s/s_max * 450).round().astype(int)
-
-    print(f"{s[:30]=}")
-
-    enc = Encoder()
-    encoded = b"".join(list(enc.encode_int_array(s)))
-
-    with open("encoded.bin", "wb") as out_fo:
-        out_fo.write(encoded)
-
-    return encoded
-
-
-from spana.offset_table import OffsetTableDb
-from spana.file_paths import get_default_image_bytes
-
-import wave
-
-def decoder_main():
-
-    os.makedirs("decoded_sounds", exist_ok=True)
-
-    image_bytes = get_default_image_bytes()
-
-    otd = OffsetTableDb.get_default()
-    for ote in otd:
-        speech_bytes = image_bytes[ote.sound_data_start_addr:ote.sound_data_end_addr]
-
-        compressed_len_bytes = len(speech_bytes)
-
-        dec = Decoder()
-        pcm = dec.decode_fully( io.BytesIO(speech_bytes) )
-        #print(f'{pcm=}')
-
-        filename = f"decoded_sounds/ss_{ote.idx:03d}_{ote.speech or '???'}.wav"
-        a_pcm = np.array(pcm, dtype=float)
-        a_pcm /= np.abs(a_pcm).max()
-
-        decoded_len_bytes = len(a_pcm) * 2  # assuming 16 bit encoding
-
-        wav_write(filename=filename, rate=int(ote.sample_rate_Hz), data=a_pcm)
-        #wav_write(filename=filename, rate=10000, data=a_pcm)
-
-        #with wave.open(filename, mode="wb") as wav_file:
-        #    wav_file.setnchannels(1)
-        #    wav_file.setsampwidth(2)
-        #    wav_file.setframerate(10000)
-        #    wav_file.writeframes( b"".join([ int(x).to_bytes(length=2, byteorder='little') for x in pcm ]) )
-
-        CR = decoded_len_bytes / compressed_len_bytes
-
-        print(f"  wrote {filename}, enc size: {compressed_len_bytes:5d}, pcm size: {decoded_len_bytes}, CR: {CR:2.2f}")
-
-if __name__ == "__main__":
-    decoder_main()
-
 
