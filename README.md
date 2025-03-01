@@ -136,5 +136,7 @@ flashrom -p ch341a_spi -c 'XM25QH80B' -w snoop_and_spell.bin
 
 ## Related Presentations
 - As presented at DistrictCon Year 0 (22 Feb 2025): _Hacking Childhood Memories A tale of reverse engineering, audio encodings, and never growing up_
+  - [Presentation Slides](https://github.com/jeremytrimble/speaknspell_analysis/wiki/Hacking%20Childhood%20Memories.pdf)
+  - [Presentation Video](https://www.youtube.com/live/6qX5N7FsiXU?si=9c2ieD-saIWfL3l8&t=66)
 
 
